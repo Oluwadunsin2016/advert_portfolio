@@ -1,26 +1,97 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
+/* The site is always dark, so shadcn's dark: styles always apply. */
+@custom-variant dark (&:is(html *));
+
+/* Charcoal, off-white and a restrained lime accent, used sparingly for
+   calls to action and small highlights. */
+@theme {
+  --color-bg: #0b0b0c;
+  --color-surface: #151517;
+  --color-fg: #f4f2ee;
+  --color-muted: #a3a29e;
+  --color-line: #2a2a2d;
+  --color-accent: #d7f75b;
+
+  --font-sans: var(--font-geist-sans);
+  --font-display: var(--font-bricolage);
+}
+
+/* The tokens shadcn/ui components use, mapped onto the palette above.
+   `muted` and `accent` are deliberately not mapped: the site uses those
+   names for grey text and the lime highlight. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --radius: 0.625rem;
+  --background: #0b0b0c;
+  --foreground: #f4f2ee;
+  --popover: #151517;
+  --popover-foreground: #f4f2ee;
+  --primary: #d7f75b;
+  --primary-foreground: #0b0b0c;
+  --muted-foreground: #a3a29e;
+  --destructive: #f87171;
+  --border: #2a2a2d;
+  --input: #2a2a2d;
+  --ring: #d7f75b;
 }
 
 @theme inline {
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  /* Keyboard focus outline for links and buttons. Form fields (shadcn
+     components, marked with data-slot) show focus with a lime border
+     instead, so they're excluded to avoid a second ring. */
+  :focus-visible:not([data-slot]) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
   }
 }
 
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-fg);
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
