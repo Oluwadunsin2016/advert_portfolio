@@ -48,7 +48,9 @@ export type Advert = {
    * phones. Only needed for the project shown in the hero.
    */
   heroVideo?: { src: string; small?: string };
-  /** Thumbnail image in /public. Falls back to a gradient in `accent`. */
+  /** Plays in the hero. Set from the dashboard; otherwise the first advert is used. */
+  featured?: boolean;
+  /** Thumbnail image (path in /public or a full URL). Falls back to a gradient in `accent`. */
   poster?: string;
   /** Colour used for the fallback poster. */
   accent: string;

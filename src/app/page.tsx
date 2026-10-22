@@ -4,7 +4,7 @@ import { HeroFeature } from "@/components/hero-feature";
 import { Portrait } from "@/components/portrait";
 import { SectionHeading } from "@/components/section-heading";
 import { WorkGrid } from "@/components/work-grid";
-import { getPublishedAdverts } from "@/content/adverts";
+import { getPublishedAdverts } from "@/content/get-adverts";
 import { faq } from "@/content/faq";
 // import { packages, pricingNotes, showPrices } from "@/content/pricing"; // Pricing section (hidden)
 import { process, services } from "@/content/services";
@@ -12,8 +12,9 @@ import { site } from "@/content/site";
 
 const container = "mx-auto max-w-6xl px-4 sm:px-6";
 
-export default function Home() {
-  const adverts = getPublishedAdverts();
+export default async function Home() {
+  const adverts = await getPublishedAdverts();
+  const heroAdvert = adverts.find((a) => a.featured) ?? adverts[0];
 
   return (
     <>
@@ -42,9 +43,9 @@ export default function Home() {
           </div>
           <p className="mt-8 text-sm text-muted">Creative concepts • AI video production • Editing &amp; sound</p>
         </div>
-        {adverts[0] && (
+        {heroAdvert && (
           <div className="mx-auto w-full max-w-3xl">
-            <HeroFeature advert={adverts[0]} />
+            <HeroFeature advert={heroAdvert} />
           </div>
         )}
       </section>

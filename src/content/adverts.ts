@@ -1,8 +1,9 @@
 import type { Advert } from "./types";
 
-// Your projects. A project shows on the site only when its status is
-// "published" AND it has a video. The first published project plays in the
-// hero; the rest appear in this order in the work section.
+// Built-in projects, used when the portfolio isn't connected to the dashboard
+// API (PORTFOLIO_API_URL), or if the API is unreachable. Manage adverts in the
+// dashboard; this list is a fallback. A project shows only when "published"
+// AND it has a video. The first one plays in the hero.
 export const adverts: Advert[] = [
   {
     slug: "dark-secret",
@@ -144,10 +145,6 @@ export const adverts: Advert[] = [
     accent: "#d6c7b4",
   },
 ];
-
-export function getPublishedAdverts() {
-  return adverts.filter((a) => a.status === "published" && a.video);
-}
 
 export function statusLabel(advert: Advert) {
   return advert.kind === "concept" ? "Concept Advertisement" : "Client Project";
