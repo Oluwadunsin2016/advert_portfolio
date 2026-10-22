@@ -126,6 +126,23 @@ export const adverts: Advert[] = [
     poster: "/posters/pepsodent-review.jpg",
     accent: "#0ea5e9",
   },
+  {
+    slug: "moisturizer",
+    status: "published",
+    kind: "concept",
+    title: "Moisturizer — Product Ad Concept",
+    category: "Product Commercial",
+    duration: "0:32",
+    orientation: "portrait",
+    // [CONFIRM] Written from the thumbnail; replace with your own description.
+    summary: "A presenter-led skincare ad concept introducing a face moisturizer in a bright, natural bathroom setting.",
+    video: {
+      type: "drive",
+      id: "https://drive.google.com/file/d/1W7oA16IV7AyuxawmZuh7avH7Vb2EbyAI/view?usp=sharing",
+    },
+    poster: "/posters/moisturizer.jpg",
+    accent: "#d6c7b4",
+  },
 ];
 
 export function getPublishedAdverts() {
