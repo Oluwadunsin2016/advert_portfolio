@@ -38,8 +38,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${bricolage.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col font-sans">
+    // Browser extensions (reader modes, dark-mode tools, Grammarly, ...) add
+    // attributes to <html> and <body> before React loads. suppressHydrationWarning
+    // ignores attribute differences on these two tags only, not their contents.
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${bricolage.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
+      <body className="flex min-h-full flex-col font-sans" suppressHydrationWarning>
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-accent focus:px-4 focus:py-2 focus:text-bg"

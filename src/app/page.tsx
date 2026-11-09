@@ -57,7 +57,7 @@ export default async function Home() {
           title="Selected Work"
           intro="A selection of AI-powered advertising concepts exploring product storytelling, cinematic visuals and creator-style formats."
         />
-        <WorkGrid adverts={adverts} />
+        <WorkGrid adverts={adverts} preview />
         <p className="mt-12 max-w-3xl border-l-2 border-accent/60 pl-4 text-sm text-muted">
           Projects labelled <strong className="text-fg">Concept Advertisement</strong> are independent spec work made to
           demonstrate different approaches to AI-powered product advertising. They were not commissioned or endorsed

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { statusLabel } from "@/content/adverts";
 import { categories, type Advert, type Category } from "@/content/types";
@@ -13,7 +14,14 @@ const filterLabels: Record<Category, string> = {
   "Review-Style Video": "Review-Style Videos",
 };
 
-export function WorkGrid({ adverts }: { adverts: Advert[] }) {
+/** How many of each shape the home page shows before "View all". */
+export const PREVIEW_COUNT = { landscape: 2, portrait: 3 } as const;
+
+/**
+ * With `preview`, each shape shows only its first few videos plus a link to
+ * its own page (/work/landscape or /work/portrait) listing them all.
+ */
+export function WorkGrid({ adverts, preview = false }: { adverts: Advert[]; preview?: boolean }) {
   const [filter, setFilter] = useState<Category | "All">("All");
   const used = categories.filter((c) => adverts.some((a) => a.category === c));
   const shown = filter === "All" ? adverts : adverts.filter((a) => a.category === filter);
@@ -43,29 +51,62 @@ export function WorkGrid({ adverts }: { adverts: Advert[] }) {
           label="Landscape · 16:9"
           adverts={shown.filter((a) => a.orientation === "landscape")}
           columns="md:grid-cols-2"
+          limit={preview ? PREVIEW_COUNT.landscape : undefined}
+          allHref="/work/landscape"
+          allLabel="landscape"
         />
         <CardGroup
           label="Portrait · 9:16"
           adverts={shown.filter((a) => a.orientation === "portrait")}
           columns="sm:grid-cols-2 lg:grid-cols-3"
+          limit={preview ? PREVIEW_COUNT.portrait : undefined}
+          allHref="/work/portrait"
+          allLabel="portrait"
         />
       </div>
     </div>
   );
 }
 
-function CardGroup({ label, adverts, columns }: { label: string; adverts: Advert[]; columns: string }) {
+function CardGroup({
+  label,
+  adverts,
+  columns,
+  limit,
+  allHref,
+  allLabel,
+}: {
+  label: string;
+  adverts: Advert[];
+  columns: string;
+  limit?: number;
+  allHref: string;
+  allLabel: string;
+}) {
   if (adverts.length === 0) return null;
+  const visible = limit === undefined ? adverts : adverts.slice(0, limit);
+  const hasMore = visible.length < adverts.length;
   return (
     <section aria-label={label}>
       <h3 className="mb-5 text-xs tracking-widest text-muted uppercase">{label}</h3>
       <ul className={`grid gap-x-6 gap-y-12 ${columns}`}>
-        {adverts.map((advert) => (
+        {visible.map((advert) => (
           <li key={advert.slug}>
             <ProjectCard advert={advert} />
           </li>
         ))}
       </ul>
+      {hasMore && (
+        <div className="mt-8 flex justify-end">
+          <Link
+            href={allHref}
+            className="inline-flex items-center gap-2 font-medium transition-colors hover:text-accent"
+          >
+            View all {adverts.length} {allLabel} videos
+            <span aria-hidden>→</span>
+          </Link>
+        </div>
+      )}
     </section>
   );
 }
