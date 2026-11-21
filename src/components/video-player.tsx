@@ -22,6 +22,8 @@ export function VideoPlayer({ video, title, orientation, poster, accent, priorit
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [started, setStarted] = useState(false);
   const [missing, setMissing] = useState(false);
+  const retries = useRef(0);
+  const retryTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const embedFrameRef = useRef<HTMLDivElement>(null);
   // null until measured: Drive lays itself out once, at load, so it mustn't
   // load until its final size is known.
@@ -67,13 +69,31 @@ export function VideoPlayer({ video, title, orientation, poster, accent, priorit
     return () => observer.disconnect();
   }, [video.type]);
 
-  // A missing file can fail before hydration, when onError isn't listening yet.
+  // A load can fail before hydration, when onError isn't listening yet. Only a
+  // real error counts: networkState can briefly read "no source" while the
+  // browser is still starting the request, which isn't a failure.
   useEffect(() => {
-    const el = videoRef.current;
-    if (el && (el.error || el.networkState === el.NETWORK_NO_SOURCE)) {
-      setMissing(true);
-    }
+    if (videoRef.current?.error) handleError();
+    return () => clearTimeout(retryTimer.current);
   }, []);
+
+  // Remote videos (Cloudinary) can fail on a first, busy page load. Retry a
+  // few times before giving up, instead of showing an error until a refresh.
+  function handleError() {
+    const el = videoRef.current;
+    if (!el || retries.current >= MAX_RETRIES) {
+      setMissing(true);
+      return;
+    }
+    retries.current += 1;
+    clearTimeout(retryTimer.current);
+    retryTimer.current = setTimeout(() => el.load(), 1000 * retries.current);
+  }
+
+  function retry() {
+    retries.current = 0;
+    setMissing(false);
+  }
 
   const frame = fill
     ? "relative h-full w-full overflow-hidden bg-black"
@@ -85,9 +105,16 @@ export function VideoPlayer({ video, title, orientation, poster, accent, priorit
         <div className={frame}>
           <Poster poster={poster} accent={accent} title={title} />
           <div className="absolute inset-0 grid place-items-center bg-black/60 p-6 text-center text-sm text-white/80">
-            <p>
-              Video not found. Add it at <code className="rounded bg-white/10 px-1.5 py-0.5">public{video.src}</code>
-            </p>
+            <div>
+              <p>This video couldn&apos;t load.</p>
+              <button
+                type="button"
+                onClick={retry}
+                className="mt-3 rounded-full bg-white/90 px-4 py-2 font-medium text-black transition-colors hover:bg-accent"
+              >
+                Try again
+              </button>
+            </div>
           </div>
         </div>
       );
@@ -102,7 +129,7 @@ export function VideoPlayer({ video, title, orientation, poster, accent, priorit
           controls
           playsInline
           preload={priority ? "auto" : "metadata"}
-          onError={() => setMissing(true)}
+          onError={handleError}
         />
       </div>
     );
@@ -151,6 +178,7 @@ export function VideoPlayer({ video, title, orientation, poster, accent, priorit
 }
 
 const DRIVE_MIN_WIDTH = 360;
+const MAX_RETRIES = 3;
 
 function embedUrl(video: Exclude<VideoSource, { type: "file" }>) {
   switch (video.type) {
