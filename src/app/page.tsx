@@ -1,53 +1,51 @@
-// import { ChooseServiceLink } from "@/components/choose-service-link"; // Pricing section (hidden)
+import { ChooseServiceLink } from "@/components/choose-service-link";
 import { ContactForm } from "@/components/contact-form";
-import { HeroFeature } from "@/components/hero-feature";
+import { HeroBackdrop } from "@/components/hero-backdrop";
 import { Portrait } from "@/components/portrait";
 import { SectionHeading } from "@/components/section-heading";
 import { WorkGrid } from "@/components/work-grid";
 import { getPublishedAdverts } from "@/content/get-adverts";
 import { faq } from "@/content/faq";
-// import { packages, pricingNotes, showPrices } from "@/content/pricing"; // Pricing section (hidden)
-import { process, services } from "@/content/services";
+import { process } from "@/content/services";
 import { site } from "@/content/site";
+import { getSiteContent } from "@/content/site-content";
 
 const container = "mx-auto max-w-6xl px-4 sm:px-6";
 
 export default async function Home() {
-  const adverts = await getPublishedAdverts();
+  const [adverts, { hero, services, about, pricing }] = await Promise.all([getPublishedAdverts(), getSiteContent()]);
   const heroAdvert = adverts.find((a) => a.featured) ?? adverts[0];
 
   return (
     <>
-      {/* Hero: stacked and centred on small screens, two columns on desktop */}
-      <section
-        className={`${container} grid items-center gap-14 pt-14 pb-20 sm:pt-20 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12`}
-      >
-        <div className="mx-auto max-w-2xl text-center lg:mx-0 lg:text-left">
-          <p className="mb-5 text-sm font-medium tracking-widest text-accent uppercase">
-            AI-Powered Video Advertising
-          </p>
-          <h1 className="font-display text-4xl leading-[1.02] font-bold tracking-tight sm:text-5xl xl:text-6xl">
-            Make Your Product Impossible to Ignore.
-          </h1>
-          <p className="mx-auto mt-6 max-w-xl text-lg text-muted lg:mx-0">
-            I create AI-powered product commercials, UGC-style video ads and product explainers that turn ideas into
-            polished visual stories, built around your brand, your audience and your goals.
-          </p>
-          <div className="mt-9 flex flex-wrap justify-center gap-3 lg:justify-start">
-            <a href="#work" className="rounded-full bg-accent px-6 py-3 font-semibold text-bg hover:opacity-90">
-              Watch My Work
-            </a>
-            <a href="#contact" className="rounded-full border border-line px-6 py-3 font-medium hover:border-fg">
-              Start a Project
-            </a>
+      {/* Hero: the starred advert plays as a faded background, with the text over it */}
+      <section className="relative isolate overflow-hidden">
+        {heroAdvert && <HeroBackdrop advert={heroAdvert} />}
+        <div
+          className={`${container} flex min-h-[calc(100svh-4rem)] items-end pt-40 pb-28 lg:min-h-[44rem] lg:items-center lg:pt-24 lg:pb-32`}
+        >
+          <div className="mx-auto max-w-2xl text-center lg:mx-0 lg:max-w-xl lg:text-left">
+            {hero.eyebrow && (
+              <p className="mb-5 text-sm font-medium tracking-widest text-accent uppercase">{hero.eyebrow}</p>
+            )}
+            <h1 className="font-display text-4xl leading-[1.02] font-bold tracking-tight text-balance sm:text-5xl xl:text-6xl">
+              {hero.headline}
+            </h1>
+            <p className="mx-auto mt-6 max-w-xl text-lg text-fg/75 lg:mx-0">{hero.intro}</p>
+            <div className="mt-9 flex flex-wrap justify-center gap-3 lg:justify-start">
+              <a href="#work" className="rounded-full bg-accent px-6 py-3 font-semibold text-bg hover:opacity-90">
+                {hero.primaryCta}
+              </a>
+              <a
+                href="#contact"
+                className="rounded-full border border-fg/25 bg-bg/40 px-6 py-3 font-medium backdrop-blur hover:border-fg"
+              >
+                {hero.secondaryCta}
+              </a>
+            </div>
+            {hero.tagline && <p className="mt-8 text-sm text-fg/60">{hero.tagline}</p>}
           </div>
-          <p className="mt-8 text-sm text-muted">Creative concepts • AI video production • Editing &amp; sound</p>
         </div>
-        {heroAdvert && (
-          <div className="mx-auto w-full max-w-3xl">
-            <HeroFeature advert={heroAdvert} />
-          </div>
-        )}
       </section>
 
       {/* Work */}
@@ -68,14 +66,10 @@ export default async function Home() {
       {/* Services */}
       <section id="services" className="border-y border-line bg-surface">
         <div className={`${container} py-24`}>
-          <SectionHeading
-            eyebrow="Services"
-            title="What I Create"
-            intro="From creator-style product videos to cinematic commercials, choose the format that fits your product and campaign."
-          />
+          <SectionHeading eyebrow={services.eyebrow} title={services.title} intro={services.intro || undefined} />
           <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {services.map((s) => (
-              <li key={s.id} className="flex flex-col rounded-xl border border-line bg-bg p-7">
+            {services.items.map((s, i) => (
+              <li key={i} className="flex flex-col rounded-xl border border-line bg-bg p-7">
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="font-display text-2xl font-semibold">{s.title}</h3>
                   {!s.available && (
@@ -85,16 +79,22 @@ export default async function Home() {
                   )}
                 </div>
                 <p className="mt-3 text-muted">{s.summary}</p>
-                <dl className="mt-6 space-y-4 border-t border-line pt-5 text-sm">
-                  <div>
-                    <dt className="font-medium">May include</dt>
-                    <dd className="mt-1 text-muted">{s.includes}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium">Best for</dt>
-                    <dd className="mt-1 text-muted">{s.bestFor}</dd>
-                  </div>
-                </dl>
+                {(s.includes || s.bestFor) && (
+                  <dl className="mt-6 space-y-4 border-t border-line pt-5 text-sm">
+                    {s.includes && (
+                      <div>
+                        <dt className="font-medium">May include</dt>
+                        <dd className="mt-1 text-muted">{s.includes}</dd>
+                      </div>
+                    )}
+                    {s.bestFor && (
+                      <div>
+                        <dt className="font-medium">Best for</dt>
+                        <dd className="mt-1 text-muted">{s.bestFor}</dd>
+                      </div>
+                    )}
+                  </dl>
+                )}
                 {s.note && <p className="mt-5 text-xs text-muted italic">{s.note}</p>}
               </li>
             ))}
@@ -126,65 +126,55 @@ export default async function Home() {
         </p>
       </section>
 
-      {/* Pricing: hidden for now while payment is agreed per project. To bring it
-          back, remove this comment wrapper, uncomment the two imports at the top,
-          and re-add Pricing to `nav` in src/content/site.ts.
-      <section id="pricing" className="border-y border-line bg-surface">
-        <div className={`${container} py-24`}>
-          <SectionHeading
-            eyebrow="Pricing"
-            title="Clear Starting Prices. Creative Built Around Your Product."
-            intro="Choose a starting package below. Every project is scoped around your product, creative direction, duration and delivery needs. If your idea needs a more involved production, request a custom quote."
-          />
-          <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {packages.map((p) => (
-              <li key={p.name} className="flex flex-col rounded-xl border border-line bg-bg p-6">
-                <h3 className="font-display text-xl font-semibold">{p.name}</h3>
-                <p className="mt-3 font-display text-2xl font-bold text-accent">
-                  {showPrices ? p.price : "Request a quote"}
-                </p>
-                <ul className="mt-5 mb-8 space-y-2 text-sm text-muted">
-                  {p.includes.map((item) => (
-                    <li key={item} className="flex gap-2">
-                      <span aria-hidden className="text-accent">
-                        ✓
-                      </span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <ChooseServiceLink service={p.enquiryService}>Request a Quote</ChooseServiceLink>
-              </li>
-            ))}
-          </ul>
-          <ul className="mt-10 grid gap-2 text-sm text-muted md:grid-cols-2">
-            {pricingNotes.map((note) => (
-              <li key={note} className="flex gap-2">
-                <span aria-hidden>•</span>
-                {note}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-      */}
+      {/* Pricing: switched on and edited in the dashboard */}
+      {pricing.visible && pricing.plans.length > 0 && (
+        <section id="pricing" className="border-y border-line bg-surface">
+          <div className={`${container} py-24`}>
+            <SectionHeading eyebrow={pricing.eyebrow} title={pricing.title} intro={pricing.intro || undefined} />
+            <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {pricing.plans.map((p) => (
+                <li key={p.name} className="flex flex-col rounded-xl border border-line bg-bg p-6">
+                  <h3 className="font-display text-xl font-semibold">{p.name}</h3>
+                  <p className="mt-3 font-display text-2xl font-bold text-accent">
+                    {pricing.showPrices && p.price ? p.price : "Request a quote"}
+                  </p>
+                  <ul className="mt-5 mb-8 space-y-2 text-sm text-muted">
+                    {p.features.map((item) => (
+                      <li key={item} className="flex gap-2">
+                        <span aria-hidden className="text-accent">
+                          ✓
+                        </span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                  <ChooseServiceLink service={p.service}>Request a Quote</ChooseServiceLink>
+                </li>
+              ))}
+            </ul>
+            {pricing.notes.length > 0 && (
+              <ul className="mt-10 grid gap-2 text-sm text-muted md:grid-cols-2">
+                {pricing.notes.map((note) => (
+                  <li key={note} className="flex gap-2">
+                    <span aria-hidden>•</span>
+                    {note}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* About */}
       <section id="about" className={`${container} grid items-center gap-14 py-24 lg:grid-cols-[0.75fr_1.25fr]`}>
-        <Portrait />
+        <Portrait about={about} />
         <div className="max-w-3xl">
-          <SectionHeading eyebrow="About" title="The Creator Behind the Concepts" />
+          <SectionHeading eyebrow={about.eyebrow} title={about.title} />
           <div className="space-y-5 text-lg leading-relaxed text-fg/85">
-            <p>
-              I&apos;m an AI advertisement creator focused on turning product ideas into engaging video concepts. My
-              work combines creative development, AI-generated visuals and video editing to explore different ways a
-              product can be presented, from creator-style social ads to cinematic commercials.
-            </p>
-            <p>
-              I care about clear storytelling, product-focused visuals, and a finished video that feels intentional from
-              the opening shot to the final frame. If you have a product to introduce, explain or promote, I&apos;d be
-              glad to discuss a creative direction that fits your goals.
-            </p>
+            {about.paragraphs.map((paragraph, i) => (
+              <p key={i}>{paragraph}</p>
+            ))}
           </div>
         </div>
       </section>

@@ -1,7 +1,10 @@
 import Link from "next/link";
-import { nav, site } from "@/content/site";
+import { navItems, site } from "@/content/site";
+import { getSiteContent } from "@/content/site-content";
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const { pricing } = await getSiteContent();
+  const nav = navItems(pricing.visible);
   return (
     <footer className="border-t border-line">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_1fr]">

@@ -16,12 +16,19 @@ export const site = {
   copyrightYear: 2026,
 };
 
-export const nav = [
+export type NavItem = { label: string; href: string };
+
+const allNav: NavItem[] = [
   { label: "Work", href: "/#work" },
   { label: "Services", href: "/#services" },
   { label: "Process", href: "/#process" },
-  // { label: "Pricing", href: "/#pricing" }, // Pricing section is hidden for now
+  { label: "Pricing", href: "/#pricing" },
   { label: "About", href: "/#about" },
   { label: "FAQ", href: "/#faq" },
   { label: "Contact", href: "/#contact" },
 ];
+
+/** Menu links. Pricing is listed only while it's switched on in the dashboard. */
+export function navItems(showPricing: boolean) {
+  return showPricing ? allNav : allNav.filter((item) => item.href !== "/#pricing");
+}

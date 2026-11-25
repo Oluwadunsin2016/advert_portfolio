@@ -1,9 +1,10 @@
 import { timingSafeEqual } from "node:crypto";
 import { revalidateTag } from "next/cache";
 import { ADVERTS_TAG } from "@/content/get-adverts";
+import { CONTENT_TAG } from "@/content/site-content";
 
 /**
- * Called by the dashboard's API whenever adverts change, so the portfolio
+ * Called by the dashboard's API whenever adverts or site content change, so the portfolio
  * shows the change on the next visit instead of waiting for its cache to expire.
  */
 export async function POST(request: Request) {
@@ -14,6 +15,7 @@ export async function POST(request: Request) {
   }
   // expire: 0 = the next visitor gets fresh data, not the old list.
   revalidateTag(ADVERTS_TAG, { expire: 0 });
+  revalidateTag(CONTENT_TAG, { expire: 0 });
   return Response.json({ revalidated: true });
 }
 

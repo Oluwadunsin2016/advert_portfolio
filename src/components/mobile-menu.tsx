@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { nav } from "@/content/site";
+import type { NavItem } from "@/content/site";
 
-export function MobileMenu() {
+export function MobileMenu({ nav }: { nav: NavItem[] }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
